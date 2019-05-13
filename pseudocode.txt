@@ -1,0 +1,78 @@
+General Problem Statement:
+
+Write a library that is capable of finding words that match exactly given a set
+of letters to use to form the word.
+
+The program should be written in Java and make reasonable considerations for
+performance and simplicity.
+
+Overall solution method:
+
+Process the dictionary to turn each word into a ordered version of it, and store that
+new ordered word mapping back to the original word.
+
+For example, "apple" would be turned into "aelpp", so that any ordering of those letters
+could be ordered to that as well and then "apple" be looked up from it.
+
+More specifics:
+
+The ordered and sorted dictionaries could be stored on disk and then searched through
+using binary search to minimize disk lookups. Realistically though that is nonsensical.
+The size of both dictionaries loaded into memory is trivial these days and the library
+could be integrated into a service that just keeps that data in memory at all times.
+
+Optimizing for small disk lookups could be done but is not necessary.
+
+The question then becomes how to look through the sorted dictionary loaded into memory?
+Should it just be loaded in as an array and then binary search used on it? That would
+work acceptably, but binary search through an array is not guaranteed to be balanced.
+
+Such a lookup would make more sense as a binary search tree. The question then becomes
+if a binary search tree should be used? Does it makes sense? I don't think it does, in
+that a simple HashMap lookup can be used mapping the sorted keys back to words that match.
+
+Under the hood, a hashmap hashes the key into a lookup that is typically stored in a
+self-balanacing binary search tree. ( typically a red-black tree )
+
+Is there some more efficient way to do the lookup with a more custom structure? Yes.
+One could make a trie with each letter mapping out from each position in the tree. That
+is, at the root there would be 26 lookups, for all possible letters. At each of those
+position would be lookups for specific counts of those letters being available.
+
+From each of those nodes more branches could go off to the second letter to lookup. This
+structure would be more efficient because it skips hashing the keys to numbers and
+because it only needs a single lookup per letter instead of a binary lookup each time.
+
+Could it be made even faster than that? Yes. One could use a bucket lookup of smaller
+trees using the first 3 letters of the letter-set. For example, in "apple", which becomes
+"aelpp", the first 3 letters are "ael". The size of the buckets would be 26^3. That is
+approx 18k. Compared to the size of a dictionary the size of such a lookup would be
+trivial. At each position in that 19k structure a smaller HashMap could be stored with
+the additional letters and counts. So "p" would be the rest that would be looked up.
+
+A long example would be "dictionary". That becomes "acdiinorty". If repeats of the same
+letter are collapsed it would be "acdinorty"; the first 3 are then "acd". "inorty" would
+then be stored in the smaller HashMap stored under acd.
+
+To determine the size the initial HashMap should be, performance analysis should be done.
+Offhand it seems that anything over 26^4 would be unreasonably large. Once the size gets
+bigger than that it makes sense to do a key to hash computation then use bucketing with
+overlap. That would be another method to consider.
+
+Chosen specific method:
+
+For a reasonable performance that does not need extensive testing and can be done
+trivially I reccomend the HashMap method for this without a initial lookup.
+
+Class layout:
+
+DictionaryScanner
+    functions/method:
+        new/load ( load dictionary from file )
+        find_matches ( given a set of letters find a match )
+    private data:
+        word_array ( array of words loaded from dictionary )
+        sorted_map ( hashmap of the sorted words to a list of word_array indexes )
+        
+    
+    
