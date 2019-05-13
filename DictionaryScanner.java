@@ -1,13 +1,20 @@
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class DictionaryScanner
 {
-    private List words;
-    private HashMap<String, List<int>> map;
+    private List<String> words;
+    private HashMap<String, List<Integer>> map;
 
-    DictionaryScanner(String[] dict_file) {
+    DictionaryScanner(String dict_file) throws FileNotFoundException, IOException {
+        words = new ArrayList<String>();
+        
         DictionaryScanner scanner = new DictionaryScanner(dict_file);
         
         BufferedReader reader = new BufferedReader(new FileReader(dict_file));
@@ -20,14 +27,16 @@ public class DictionaryScanner
         reader.close();
     }
 
-    private static void add_word(String word) {
+    private void add_word(String word) {
         words.add(word);
-        int index = words.length;
+        int index = words.size()-1;
         String sorted = sort_word(word);
-        List<int> matches = map.get(sorted);
+        List<Integer> matches = map.get(sorted);
         
-        if( NULL == matches ) {
-            map.set(sorted, new List<index>);
+        if (matches == null) {
+            List<Integer> ints = new ArrayList<Integer>();
+            ints.add(index);
+            map.put(sorted, ints);
         }
         else {
             matches.add(index);
@@ -40,18 +49,18 @@ public class DictionaryScanner
         return new String(letters);
     }
     
-    public static List<String> find_matches(String letters) {
+    public List<String> find_matches(String letters) {
         String sorted = sort_word(letters);
-        List<String> string_matches = new List<String>;
+        List<String> string_matches = new ArrayList<String>();
         
-        List<int> match_indexes = map.get(sorted);
-        if( NULL == match_indexes ) {
-            return NULL;
+        List<Integer> match_indexes = map.get(sorted);
+        if (match_indexes == null) {
+            return null;
         }
         
         boolean exact_match = false;
         for (int match_index : match_indexes) {
-            String word = words.getAt(match_index);
+            String word = words.get(match_index);
             if(word == letters) {
                 exact_match = true;
             }
@@ -60,7 +69,7 @@ public class DictionaryScanner
             }
         }
         if(exact_match == true) {
-            List<String> exact_first = new List<String>;
+            List<String> exact_first = new ArrayList<String>();
             exact_first.add(letters);
             exact_first.addAll(string_matches);
             return exact_first;
