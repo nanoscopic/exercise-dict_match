@@ -67,12 +67,38 @@ trivially I reccomend the HashMap method for this without a initial lookup.
 Class layout:
 
 DictionaryScanner
-    functions/method:
+    public functions/method:
         new/load ( load dictionary from file )
         find_matches ( given a set of letters find a match )
+    privates functions/methods:
+        sort_word
     private data:
         word_array ( array of words loaded from dictionary )
         sorted_map ( hashmap of the sorted words to a list of word_array indexes )
         
+Pseudocode:
+
+new/load
+    open file - set file handle
+    read file handle a line at a time
+    for each line
+        sort the word
+        store the word into the word_array
+        check if that key exists already in sorted_map
+            if it does, lookup the List already there and add to it
+            if it does not, create a new single entry list and store it
     
+sort_word
+    store each letter of the word into an array/list
+    sort the list
+    turn it back into a string
+    return that string
     
+find_matches
+    sort input letter set ( using sort_word )
+    lookup the List of matches from sorted_map
+    if none, return none
+    fetch the actual matching words from word_array
+    look through the results to see if any of them is an exact match; if
+        so, put it at the start
+    return the list of sorted words
