@@ -14,14 +14,14 @@ public class DictionaryScanner
 
     DictionaryScanner(String dict_file) throws FileNotFoundException, IOException {
         words = new ArrayList<String>();
-        
-        DictionaryScanner scanner = new DictionaryScanner(dict_file);
+        map = new HashMap<String, List<Integer>>();
         
         BufferedReader reader = new BufferedReader(new FileReader(dict_file));
         
         String line = reader.readLine();
-        while (line!= null) {
+        while (line != null) {
             add_word(line);
+            line = reader.readLine();
         }
         
         reader.close();
@@ -31,7 +31,7 @@ public class DictionaryScanner
         words.add(word);
         int index = words.size()-1;
         String sorted = sort_word(word);
-        List<Integer> matches = map.get(sorted);
+        List<Integer> matches = map.getOrDefault(sorted, null);
         
         if (matches == null) {
             List<Integer> ints = new ArrayList<Integer>();
@@ -53,7 +53,7 @@ public class DictionaryScanner
         String sorted = sort_word(letters);
         List<String> string_matches = new ArrayList<String>();
         
-        List<Integer> match_indexes = map.get(sorted);
+        List<Integer> match_indexes = map.getOrDefault(sorted, null);
         if (match_indexes == null) {
             return null;
         }
